@@ -24,7 +24,7 @@
 #     package  => 'git',
 #   }
 #
-define git::ssh($ssh_user, $package = 'git') {
+define git::ssh($ssh_user = $name, $package) {
 
   group {$ssh_user :
     ensure => present,
@@ -59,5 +59,5 @@ define git::ssh($ssh_user, $package = 'git') {
   }
 
   $keys = hiera_hash('ssh_keys')
-  create_resources('ssh_authorized_key', $keys)
+  create_resources('ssh_authorized_key', $keys, {require => File["/home/${ssh_user}/.ssh"]})
 }

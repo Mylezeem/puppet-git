@@ -7,6 +7,7 @@ class git::params () {
   $git_user = 'public_git'
 
   $protocol = 'ssh'
+  $port = '9418'
 
   $export_all = false
   $base_path = '/opt/git'

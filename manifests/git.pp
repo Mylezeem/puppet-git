@@ -12,6 +12,7 @@
 #   [*enable_upload_archive*]   - Should upload-archive be enabled
 #   [*set_firewall_rule*]       - Should the port 9418 be open in your firewall (Not active yet)
 #   [*package*]                 - The git package required
+#   [*port*]                    - The port to use for the git-daemon
 #
 # Actions:
 #
@@ -28,7 +29,7 @@
 #     package  => 'git',
 #   }
 #
-define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pack, $enable_upload_pack, $enable_upload_archive) {
+define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pack, $enable_upload_pack, $enable_upload_archive, $port) {
 
   group {$git_user :
     ensure => present,
@@ -46,20 +47,17 @@ define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pa
     require          => Package[$package],
   }
 
-  package {'git-daemon':
-    ensure => 'latest',
-  }
-
-  $h = get_cwd_hash_path($base_path)
+  $h = get_cwd_hash_path($base_path, $git_user)
   create_resources('file', $h)
 
   file {$base_path :
-    owner =>  $git_user,
-    group =>  $git_user,
-    mode  =>  '0700',
+    ensure  =>  directory,
+    owner   =>  $git_user,
+    group   =>  $git_user,
+    mode    =>  '0700',
   }
 
-  file {'/etc/xinetd.d/git' :
+  file {"/etc/xinetd.d/git":
     ensure  =>  present,
     content =>  template("git/git.erb"),
     mode    =>  '0600',
@@ -67,10 +65,4 @@ define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pa
     notify  =>  Service['xinetd'],
   }
 
-  service {'xinetd' :
-    ensure     => running,
-    hasrestart => true,
-    hasstatus  => true,
-    enable     => true,
-  }
 }

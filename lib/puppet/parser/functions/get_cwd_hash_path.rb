@@ -7,7 +7,7 @@ module Puppet::Parser::Functions
     fs = Hash.new()
     folder_array.each do |x|
       cpath += x +  '/'
-      fs[cpath] = Hash['name' => cpath, 'owner' => 'root', 'group' => 'root', 'mode' => '0755', 'ensure' => 'directory']
+      fs[cpath + args[1]] = Hash['name' => cpath, 'owner' => 'root', 'group' => 'root', 'mode' => '0755', 'ensure' => 'directory'] unless File.directory? cpath
     end
 	fs
   end

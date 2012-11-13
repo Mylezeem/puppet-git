@@ -45,60 +45,26 @@
 #   set_firewall_rule : true,
 # }
 #
-class git (
-  $protocol = $git::params::protocol,
-  $ssh_user = $git::params::ssh_user,
-  $git_user = $git::params::git_user,
-  $base_path = $git::params::base_path,
-  $export_all = $git::params::export_all,
-  $enable_receive_pack = $git::params::enable_receive_pack,
-  $enable_upload_pack = $git::params::enable_upload_pack,
-  $enable_upload_archive = $git::params::enable_upload_archive,
-  $set_firewall_rule = $git::params::set_firewall_rule) inherits git::params {
+class git () inherits git::params{
 
-  $package = $osfamily ? {
+  $git_package = $osfamily ? {
     'Darwin'  =>  "git-core",
     default   =>  "git",
   }
 
-  package {$package :
+  $packages = [$git_package, 'git-daemon']
+
+  package {$packages :
     ensure => latest,
   }
 
-  if $protocol != 'none' {
-    case $protocol {
-      ssh: {
-        git::ssh { 'git-ssh' :
-          ssh_user => $ssh_user,
-          package  => $package,
-        }
-      }
-      git: {
-        git::git {'git-git' :
-          git_user              => $git_user,
-          package               => $package,
-          base_path             => $base_path,
-          export_all            => $export_all,
-          enable_receive_pack   => $enable_receive_pack,
-          enable_upload_pack    => $enable_upload_pack,
-          enable_upload_archive => $enable_upload_archive,
-        }
-      }
-      /(git-ssh|ssh-git)/: {
-        git::git {'git-git' :
-          git_user              => $git_user,
-          package               => $package,
-          base_path             => $base_path,
-          export_all            => $export_all,
-          enable_receive_pack   => $enable_receive_pack,
-          enable_upload_pack    => $enable_upload_pack,
-          enable_upload_archive => $enable_upload_archive,
-        }
-        git::ssh { 'git-ssh' :
-          ssh_user => $ssh_user,
-          package  => $package,
-        }
-      }
-    }
+  $h = hiera_hash('git')
+  create_resources('git::instance', $h, {package => $git_package})
+
+  service {'xinetd' :
+    ensure     => running,
+    hasrestart => true,
+    hasstatus  => true,
+    enable     => true,
   }
 }

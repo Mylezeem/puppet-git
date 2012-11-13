@@ -9,6 +9,6 @@ service git
         wait            = no
         user            = <%= git_user %>
         server          = /usr/libexec/git-core/git-daemon
-        server_args     = --base-path=<%= base_path %> --base-path-relaxed --reuseaddr <% if export_all = 1 %> --export-all <% end %> --syslog --inetd --verbose <% if enable_receive_pack = 1 %> --enable=receive-pack<% end %><% if enable_upload_pack = 1 %> --enable=upload-pack<% end %><% if enable_archive = 1 %> --enable=upload-archive<% end %> <%= base_path %>
+      server_args     = --base-path=<%= base_path %> --base-path-relaxed --reuseaddr <% if export_all = 1 %> --export-all <% end %> --syslog --inetd --verbose <% if enable_receive_pack = 1 %> --enable=receive-pack<% end %><% if enable_upload_pack = 1 %> --enable=upload-pack<% end %><% if enable_archive = 1 %> --enable=upload-archive<% end %> <%= base_path %> --port=<%= port %>
         log_on_failure  += USERID
 }
