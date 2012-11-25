@@ -4,12 +4,11 @@
 #
 # Parameters:
 #
-#   [*ssh_user*]  - The SSH git user
-#   [*package*]   - The git package required
+#   [*user*]       - The SSH git user
+#   [*base_path*]  - The base path directory to store the git repos
 #
 # Actions:
 #
-#   - Ensure git package is installed
 #   - Create git user/group
 #   - Configure authorized_keys through hiera
 #
@@ -19,45 +18,58 @@
 #
 # Sample Usage:
 #
-#   git::ssh{'git-ssh' :
-#     ssh_user => 'git_ssh',
-#     package  => 'git',
+#   git::ssh{'git' :
+#     user      => 'git',
+#     base_path => '/opt/git',
 #   }
 #
-define git::ssh($ssh_user = $name, $package) {
+define git::ssh(
+  $user       = $name,
+  $base_path  = "/${git::params::base_path}/${user}") {
 
-  group {$ssh_user :
+  include git::params
+
+  group {$user :
     ensure => present,
   }
 
-  user {$ssh_user :
+  user {$user :
     ensure           => present,
-    home             => "/home/${ssh_user}",
-    comment          => 'The SSH Git User',
-    gid              => $ssh_user,
+    home             => $base_path,
+    comment          => "SSH GIT User : ${user}",
+    gid              => $user,
     shell            => '/usr/bin/git-shell',
     password_min_age => '0',
     password_max_age => '99999',
     password         => '*',
-    require          => Package[$package],
+    require          => Class['git'],
   }
 
-  file {"/home/${ssh_user}" :
+  file {$base_path :
     ensure  => directory,
-    owner   => $ssh_user,
-    group   => $ssh_user,
+    owner   => $user,
+    group   => $user,
     mode    => '0700',
-    require => User[$ssh_user],
+    require => User[$user],
   }
 
-  file {"/home/${ssh_user}/.ssh" :
+  file {"/${base_path}/.ssh" :
     ensure    => directory,
-    owner     => $ssh_user,
-    group     => $ssh_user,
+    owner     => $user,
+    group     => $user,
     mode      => '0600',
-    require => File["/home/${ssh_user}"],
+    require => File[$base_path],
   }
 
-  $keys = hiera_hash('ssh_keys')
-  create_resources('ssh_authorized_key', $keys, {require => File["/home/${ssh_user}/.ssh"]})
+  #
+  # Here one can manage the SSH authorized_keys via hiera
+  # The hiera_puppet being broken with definition, there is sno way
+  # to provide a default out-of-the box ::data class
+  #
+  # Please configure correctly your hiera backend (YAML, JSON, etc...) for the following to work
+  # and uncomment
+  #
+
+  #$keys = hiera_hash('ssh_keys')
+  #create_resources('ssh_authorized_key', $keys, {require => File["/${base_path}/.ssh"]})
 }

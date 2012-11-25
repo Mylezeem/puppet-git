@@ -1,23 +1,12 @@
 # Class: git
 #
-#   This class installs git server and client according to the selected protocol
+#   This class installs the git and git-daemon package
 #
 # Parameters:
 #
-#   [*protocol*]                - The protocol git will be installed to use
-#   [*ssh_user*]                - The OS username to use for the ssh protocol
-#   [*git_user*]                - The OS username to use for the git protocol
-#   [*base_path*]               - The base path for the git daemon
-#   [*export_all*]              - When using git daemon should all repo be exported
-#   [*enable_receive_pack*]     - Should receive-pack be enabled
-#   [*enable_upload_pack*]      - Should upload-pack be enabled
-#   [*enable_upload_archive*]   - Should upload-archive be enabled
-#   [*set_firewall_rule*]       - Should the port 9418 be open in your firewall (Not active yet)
-#
 # Actions:
 #
-#   - Install git to use the protocol specified
-#   - Manage git account SSH Keys
+#   Install the git & git-daemon packages
 #
 # Requires:
 #
@@ -25,46 +14,47 @@
 #
 # Sample Usage:
 #
+# include git
+#
 # class {'git':
-#   protocol: 'none',
+#   provider => 'source',
+#   version  => '1.7.4',
 # }
 #
-# class{'git':
-#   ssh_user: git,
-#   protocol: 'ssh',
-# }
 #
-# class{'git':
-#   git_user: public_git,
-#   protocol: 'git',
-#   export_all: true,
-#   base_path: '/opt/git',
-#   enable_receive_pack: true,
-#   enable_upload_pack: true,
-#   enable_archive: true,
-#   set_firewall_rule : true,
-# }
-#
-class git () inherits git::params{
+class git (
+  $provider = 'package',
+  $version  = 'latest') {
 
-  $git_package = $osfamily ? {
-    'Darwin'  =>  "git-core",
-    default   =>  "git",
-  }
+  include git::params
 
-  $packages = [$git_package, 'git-daemon']
+  case $provider {
+    'package' : {
+      $git_package = $::osfamily ? {
+        'Darwin'  =>  "git-core",
+        default   =>  "git",
+      }
 
-  package {$packages :
-    ensure => latest,
-  }
+      $packages = [$git_package, 'git-daemon']
 
-  $h = hiera_hash('git')
-  create_resources('git::instance', $h, {package => $git_package})
+      package {$packages :
+        ensure => latest,
+      }
+    }
+    'source' : {
+      package {$git::params::devtools_packages :
+        ensure => latest,
+      }
 
-  service {'xinetd' :
-    ensure     => running,
-    hasrestart => true,
-    hasstatus  => true,
-    enable     => true,
-  }
+      exec {"curl -L http://git-core.googlecode.com/files/git-${version}.tar.gz | tar -xzf - && cd git-${version} && ./configure --without-tcltk  && make && make install && rm -rf /root/git-${version}" :
+        cwd       =>  '/root',
+        user      =>  'root',
+        path      =>  ['/usr/local/bin', '/bin', '/usr/bin'],
+        timeout   =>  0,
+        logoutput =>  on_failure,
+        unless    =>  "[[ `git --version | cut -d\' \' -f3` = \'${version}\'* ]]",
+        provider  =>  'shell',
+        require   =>  Package[$git::params::devtools_packages],
+      }
+    }
 }

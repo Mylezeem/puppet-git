@@ -5,7 +5,7 @@
 # Parameters:
 #
 #   [*git_user*]                - The OS username to use for the git protocol
-#   [*base_path*]               - The base path for the git daemon
+#   [*git_base_path*]           - The base path for the git daemon
 #   [*export_all*]              - When using git daemon should all repo be exported
 #   [*enable_receive_pack*]     - Should receive-pack be enabled
 #   [*enable_upload_pack*]      - Should upload-pack be enabled
@@ -24,36 +24,45 @@
 #
 # Sample Usage:
 #
-#   git::git{'git-ssh' :
-#     ssh_user => 'git_ssh',
-#     package  => 'git',
+#   git::git{'public_git' :
+#     user        => 'public_git',
+#     base_path   => '/opt/public_git',
 #   }
 #
-define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pack, $enable_upload_pack, $enable_upload_archive, $port) {
+define git::git(
+  $user                   = $name,
+  $base_path              = "/${git::params::base_path}/${user}",
+  $export_all             = $git::params::export_all,
+  $enable_receive_pack    = $git::params::enable_receive_pack,
+  $enable_upload_pack     = $git::params::enable_upload_pack,
+  $enable_upload_archive  = $git::params::enable_upload_archive,
+  $port                   = $git::params::port) {
 
-  group {$git_user :
+  include git::params
+
+  group {$user :
     ensure => present,
   }
 
-  user {$git_user :
+  user {$user :
     ensure           => present,
-    home             => "/home/${git_user}",
-    comment          => 'The SSH Git User',
-    gid              => $git_user,
+    home             => $base_path,
+    comment          => "The Git Git User : ${user}",
+    gid              => $user,
     shell            => '/usr/bin/git-shell',
     password_min_age => '0',
     password_max_age => '99999',
     password         => '*',
-    require          => Package[$package],
+    require          => Class['git'],
   }
 
-  $h = get_cwd_hash_path($base_path, $git_user)
+  $h = get_cwd_hash_path($base_path, $user)
   create_resources('file', $h)
 
   file {$base_path :
     ensure  =>  directory,
-    owner   =>  $git_user,
-    group   =>  $git_user,
+    owner   =>  $user,
+    group   =>  $user,
     mode    =>  '0700',
   }
 
@@ -65,4 +74,10 @@ define git::git($git_user, $package, $base_path, $export_all, $enable_receive_pa
     notify  =>  Service['xinetd'],
   }
 
+  service {'xinetd' :
+    ensure     => running,
+    hasrestart => true,
+    hasstatus  => true,
+    enable     => true,
+  }
 }

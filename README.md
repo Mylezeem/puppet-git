@@ -7,93 +7,65 @@ This module allows one to setup git over two different protocols :
 
   * SSH
   * GIT
+  * HTTP (Hopefully coming soon)
 
-## SSH
+## Git
 
-The module creates the git user/group and manages the content of the authorized_keys file of the git `$ssh_user`
+One can install git either from the package repository one have set up on his server or from source for a specific version
 
-In order to make it run out of the box do have a hiera.yaml file configure at least as the following 
+### Package
 
 ```
----
-:backends:
-  - puppet
-
-:puppet:
-  :datasource: data
+include git
 ```
 
-## GIT
+This example will install the latest version of git from the repositories
+
+### Source
+
+```
+class {'git':
+  provider  => 'source',
+  version   => '1.8.0',
+}
+```
+
+This example will download / compile and install the version 1.8.0 from the source code
 
 
-The module create a public_git user/group, create a folder that will be the base repo and sets the git daemon as a xinetd service.
-
-`git daemon` arguments can be found in `/etc/xinetd.d/git`
-
-## Parameters
-
-* `ssh_user` : The GIT SSH user
-* `git_user` : The GIT GIT user
-* `protocol` : The protocol to be used. Possible values :
-  * `none` : Only install git package
-  * `ssh`  : Configure git to work with the ssh protoco  `git@host:`
-  * `git`  : Configure git to work with the git protocol `git://`
-  * `git-ssh | ssh-git` : Configure git to work with both ssh and git
-* `base_path` : The base path for the git daemon
-* `enable_receive_pack` : `true` or `false`
-* `enable_upload_pack` : `true` or `false`
-* `enable_upload_archive`: `true` or `false`
-
-
-## Sample Usage
+## Protocols
 
 ### SSH
 
+The module creates the git user/group and manages the content of the authorized_keys file of the git `$ssh_user`
+
+There is two line commented on the ssh.pp file, configure correctly a hiera.yml to use anything but hiera_puppet
+as a backend (known issue with definition) and uncomment those two lines to manager your SSH authorized keys dynamically
+
 ```
-class {'git' :
-  protocol  => 'ssh',
-  ssh_user  => 'git',
+git::ssh {'git' :
+  user      => 'git',
+  base_path => '/opt/git',
 }
 ```
 
 ### GIT
 
-A simple definition would look like this :
+The module create a public_git user/group, create a folder that will be the base repo and sets the git daemon as a xinetd service.
+
+`git daemon` arguments can be found in `/etc/xinetd.d/git`
 
 ```
-class {'git' :
-  protocol  => 'git',
+git::git {'public_git' :
+  user      =>  'public_git',
+  base_path =>  '/opt/public_git',
 }
 ```
 
-When a more complex one would be like this :
+### HTTP
 
-```
-class {'git':
-  protocol      => 'git',
-  git_user      => 'public_git',
-  export_all    => true,
-  base_path     => '/opt/git',
-  receive_pack  => true,
-}
-```
+Hopefully coming soon
 
-### GIT & SSH
+## License
 
-One can configure its box with this module so it can serves data with both protocols
-
-```
-class {'git':
-  protocol  =>  'git-ssh',
-}
-```
-
-### None
-
-Simply install the git package
-
-```
-class {'git' :
-  protocole =>  'none',
-}
-```
+GPLv3
