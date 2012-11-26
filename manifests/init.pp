@@ -30,18 +30,16 @@ class git (
 
   case $provider {
     'package' : {
-      $git_package = $::osfamily ? {
-        'Darwin'  =>  "git-core",
-        default   =>  "git",
-      }
-
-      $packages = [$git_package, 'git-daemon']
-
-      package {$packages :
+      package {$git::params::packages :
         ensure => latest,
       }
     }
     'source' : {
+
+      if $::osfamily == 'RedHat' {
+        include epel
+      }
+
       package {$git::params::devtools_packages :
         ensure => latest,
       }
@@ -52,9 +50,10 @@ class git (
         path      =>  ['/usr/local/bin', '/bin', '/usr/bin'],
         timeout   =>  0,
         logoutput =>  on_failure,
-        unless    =>  "[[ `git --version | cut -d\' \' -f3` = \'${version}\'* ]]",
+        unless    =>  "/bin/bash -c \"[[ `git --version | cut -d\' \' -f3` = \'${version}\'* ]]\"",
         provider  =>  'shell',
         require   =>  Package[$git::params::devtools_packages],
       }
     }
+  }
 }

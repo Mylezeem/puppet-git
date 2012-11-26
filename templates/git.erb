@@ -7,8 +7,9 @@ service git
         disable         = no
         socket_type     = stream
         wait            = no
-        user            = <%= git_user %>
-        server          = /usr/libexec/git-core/git-daemon
-      server_args     = --base-path=<%= base_path %> --base-path-relaxed --reuseaddr <% if export_all = 1 %> --export-all <% end %> --syslog --inetd --verbose <% if enable_receive_pack = 1 %> --enable=receive-pack<% end %><% if enable_upload_pack = 1 %> --enable=upload-pack<% end %><% if enable_archive = 1 %> --enable=upload-archive<% end %> <%= base_path %> --port=<%= port %>
+        user            = <%= user %>
+        server          = <%= git_daemon %>
+        env             = PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+        server_args     = --base-path=<%= base_path %> --base-path-relaxed --reuseaddr <% if export_all = 1 %> --export-all <% end %> --syslog --inetd --verbose <% if enable_receive_pack == true  %> --enable=receive-pack<% end %><% if enable_upload_pack == true %> --enable=upload-pack<% end %><% if enable_upload_archive == true %> --enable=upload-archive<% end %> <%= base_path %>
         log_on_failure  += USERID
 }

@@ -36,9 +36,9 @@ define git::ssh(
   user {$user :
     ensure           => present,
     home             => $base_path,
-    comment          => "SSH GIT User : ${user}",
+    comment          => "SSH GIT User ${user}",
     gid              => $user,
-    shell            => '/usr/bin/git-shell',
+    shell            => $git_shell,
     password_min_age => '0',
     password_max_age => '99999',
     password         => '*',
