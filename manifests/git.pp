@@ -31,7 +31,7 @@
 #
 define git::git(
   $user                   = $name,
-  $base_path              = "/${git::params::base_path}/${user}",
+  $base_path              = "/${git::params::base_path}/${name}",
   $export_all             = $git::params::export_all,
   $enable_receive_pack    = $git::params::enable_receive_pack,
   $enable_upload_pack     = $git::params::enable_upload_pack,
@@ -47,9 +47,9 @@ define git::git(
   user {$user :
     ensure           => present,
     home             => $base_path,
-    comment          => "The Git Git User : ${user}",
+    comment          => "The Git Git User ${user}",
     gid              => $user,
-    shell            => '/usr/bin/git-shell',
+    shell            => $git_shell,
     password_min_age => '0',
     password_max_age => '99999',
     password         => '*',
@@ -70,14 +70,14 @@ define git::git(
     ensure  =>  present,
     content =>  template("git/git.erb"),
     mode    =>  '0600',
-    require =>  Package['git-daemon'],
+    require =>  User[$user],
     notify  =>  Service['xinetd'],
   }
 
   service {'xinetd' :
     ensure     => running,
     hasrestart => true,
-    hasstatus  => true,
+    hasstatus  => false,
     enable     => true,
   }
 }
