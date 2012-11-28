@@ -31,7 +31,7 @@
 #
 define git::git(
   $user                   = $name,
-  $base_path              = "/${git::params::base_path}/${name}",
+  $base_path              = "/${git::params::base_path}/${user}",
   $export_all             = $git::params::export_all,
   $enable_receive_pack    = $git::params::enable_receive_pack,
   $enable_upload_pack     = $git::params::enable_upload_pack,
@@ -39,6 +39,11 @@ define git::git(
   $port                   = $git::params::port) {
 
   include git::params
+  $git_daemon = $git::git_daemon
+
+  if $base_path == "/${git::params::base_path}/" {
+    fail ("[git::git] base_path is a mandatory parameter")
+  }
 
   group {$user :
     ensure => present,

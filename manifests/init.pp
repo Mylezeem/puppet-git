@@ -33,6 +33,10 @@ class git (
       package {$git::params::packages :
         ensure => latest,
       }
+      $git_daemon = $::osfamily ? {
+        'RedHat' => '/usr/libexec/git-core/git-daemon',
+        default  => '/usr/lib/git-core/git-daemon',
+      }
     }
     'source' : {
 
@@ -54,6 +58,8 @@ class git (
         provider  =>  'shell',
         require   =>  Package[$git::params::devtools_packages],
       }
+      $git_daemon = '/usr/local/libexec/git-core/git-daemon'
     }
+    default : { fail("[git] The provider you selected ${provider} is not valid") }
   }
 }

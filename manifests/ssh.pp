@@ -29,6 +29,10 @@ define git::ssh(
 
   include git::params
 
+  if $base_path == "/${git::params::base_path}/" {
+    fail("[git::ssh] base_path is a mandatory parameter")
+  }
+
   group {$user :
     ensure => present,
   }
@@ -44,6 +48,9 @@ define git::ssh(
     password         => '*',
     require          => Class['git'],
   }
+
+  $h = get_cwd_hash_path($base_path, $user)
+  create_resources('file', $h)
 
   file {$base_path :
     ensure  => directory,
