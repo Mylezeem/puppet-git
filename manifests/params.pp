@@ -14,11 +14,9 @@ class git::params () {
   $set_firewall_rule = true
   case $::osfamily {
     'RedHat': {
-      $devtools_packages = ['gettext', 'make', 'gcc', 'gcc-c++', 'openssl-devel', 'libicu-devel', 'libyaml-devel', 'zlib-devel', 'readline-devel', 'autoconf', 'perl-ExtUtils-MakeMaker', 'xinetd']
       $packages = ['git', 'git-daemon', 'xinetd']
     }
     'Debian': {
-      $devtools_packages = ['gettext', 'make', 'gcc', 'g++', 'libssl-dev', 'curl', 'libicu-dev', 'libyaml-dev', 'zlib1g-dev', 'libreadline-dev', 'autoconf', 'libmodule-build-perl', 'libmodule-install-perl', 'xinetd']
       $packages = ['git', 'git-daemon-run', 'xinetd']
     }
     default: {

@@ -40,12 +40,10 @@ class git (
     }
     'source' : {
 
-      if $::osfamily == 'RedHat' {
-        include epel
-      }
+      require devtools
 
-      package {$git::params::devtools_packages :
-        ensure => latest,
+      if $::osfamily == 'RedHat' {
+        require epel
       }
 
       exec {"curl -L http://git-core.googlecode.com/files/git-${version}.tar.gz | tar -xzf - && cd git-${version} && ./configure --without-tcltk  && make && make install && rm -rf /root/git-${version}" :
@@ -56,7 +54,6 @@ class git (
         logoutput =>  on_failure,
         unless    =>  "/bin/bash -c \"[[ `git --version | cut -d\' \' -f3` = \'${version}\'* ]]\"",
         provider  =>  'shell',
-        require   =>  Package[$git::params::devtools_packages],
       }
       $git_daemon = '/usr/local/libexec/git-core/git-daemon'
     }
