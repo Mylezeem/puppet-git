@@ -6,6 +6,7 @@ description "This is a module that installs git and configure it. As for now, tw
 * Git : Git over git, this module manages the xinetd service in charge of running git daemon 
 "
 license 'GPLv3'
+dependency 'yguenane/devtools', '>= 0.0.1'
 author 'Yanis Guenane'
 source 'https://github.com/Spredzy/puppet-git'
 project_page 'https://github.com/Spredzy/puppet-git'
