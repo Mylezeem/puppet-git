@@ -55,6 +55,9 @@ The module create a public_git user/group, create a folder that will be the base
 
 `git daemon` arguments can be found in `/etc/xinetd.d/git`
 
+**Note** : Even though it is a definition - it can have multiple instances - this would require knowledge on how inetd works and /etc/services works.
+It is recommended to use it as a class - singleton.
+
 ```
 git::git {'public_git' :
   user      =>  'public_git',

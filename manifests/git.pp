@@ -38,7 +38,8 @@ define git::git(
   $enable_upload_archive  = $git::params::enable_upload_archive,
   $port                   = $git::params::port) {
 
-  include git::params
+  require git
+
   $git_daemon = $git::git_daemon
 
   if $base_path == "/${git::params::base_path}/" {

@@ -42,10 +42,6 @@ class git (
 
       require devtools
 
-      if $::osfamily == 'RedHat' {
-        require epel
-      }
-
       exec {"curl -L http://git-core.googlecode.com/files/git-${version}.tar.gz | tar -xzf - && cd git-${version} && ./configure --without-tcltk  && make && make install && rm -rf /root/git-${version}" :
         cwd       =>  '/root',
         user      =>  'root',

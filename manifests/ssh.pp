@@ -27,7 +27,7 @@ define git::ssh(
   $user       = $name,
   $base_path  = "/${git::params::base_path}/${user}") {
 
-  include git::params
+  require git
 
   if $base_path == "/${git::params::base_path}/" {
     fail("[git::ssh] base_path is a mandatory parameter")
