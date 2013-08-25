@@ -4,8 +4,8 @@
 #
 # Parameters:
 #
-#   [*git_user*]                - The OS username to use for the git protocol
-#   [*git_base_path*]           - The base path for the git daemon
+#   [*user*]                - The OS username to use for the git protocol
+#   [*base_path*]           - The base path for the git daemon
 #   [*export_all*]              - When using git daemon should all repo be exported
 #   [*enable_receive_pack*]     - Should receive-pack be enabled
 #   [*enable_upload_pack*]      - Should upload-pack be enabled
