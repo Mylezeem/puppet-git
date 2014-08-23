@@ -42,7 +42,7 @@ class git (
 
       require devtools
 
-      exec {"curl -L http://git-core.googlecode.com/files/git-${version}.tar.gz | tar -xzf - && cd git-${version} && ./configure --without-tcltk  && make && make install && rm -rf /root/git-${version}" :
+      exec {"curl -L https://www.kernel.org/pub/software/scm/git/git-${version}.tar.gz | tar -xzf - && cd git-${version} && ./configure --without-tcltk  && make && make install && rm -rf /root/git-${version}" :
         cwd       =>  '/root',
         user      =>  'root',
         path      =>  ['/usr/local/bin', '/bin', '/usr/bin'],
