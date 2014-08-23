@@ -32,15 +32,6 @@ class {'git':
 
 This example will download / compile and install the version 1.8.0 from the source code
 
-### Shell install (yum)
-```
-class { 'git':
-  provider => 'shell-yum-install',
-}
-```
-
-This example will disable epel repo and yum install git-daemon using an exec.
-
 ## Protocols
 
 ### SSH

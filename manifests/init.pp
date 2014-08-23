@@ -53,15 +53,6 @@ class git (
       }
       $git_daemon = '/usr/local/libexec/git-core/git-daemon'
     }
-    ## in RHEL git can cause conflicts with epel packages.  Puppet yum provider
-    ## has no disablerepo option support so use shell-yum-install.
-    'shell-yum-install' : {
-      exec { "install_git-daemon":
-        command => '/usr/bin/yum -y install git-daemon --disablerepo=epel',
-	creates => '/etc/xinetd.d/git',
-      }
-      $git_daemon = '/usr/libexec/git-core/git-daemon'
-    }
     default : { fail("[git] The provider you selected ${provider} is not valid") }
   }
 }
